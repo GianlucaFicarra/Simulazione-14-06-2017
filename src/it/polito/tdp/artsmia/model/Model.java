@@ -21,10 +21,13 @@ public class Model {
 
 	Simulazione sim= new Simulazione();
 	
+	
+	
 	public List<Integer> getAnniMostre() {
 		return dao.getAnniMostre();
 	}
 
+	
 	public void createGraph(Integer anno) {
 		grafo = new SimpleDirectedGraph<Mostre, DefaultEdge>(DefaultEdge.class);
 				
@@ -36,12 +39,15 @@ public class Model {
 		
 		//cerco gli archi
 		for(Mostre m: mostre) {
-			List<Mostre> successive= dao.getMostreSuccessive(m);
+						
+			// due mostre sono collegate se sono temporalmente successive 
+			//(utilizzare la data di inizio), ma hanno almeno un anno in comune
+			for(Mostre mo: mostre) {
+				if(!mo.equals(m) && mo.getInizio()<=m.getFine() 
+						&& mo.getInizio()>m.getInizio()) {
 			
-			for(Mostre mo: successive) {
-				if(!mo.equals(m)) {
-				//System.out.println("\nMostra mo: " + mo+ "Mostra partenza: " + m); stampa default
 				grafo.addEdge(m, mo);
+				      //grafo orientato da origine a destinazione
 				}
 			}
 		}
@@ -51,21 +57,21 @@ public class Model {
 		System.out.println("# Archi: " + grafo.edgeSet().size());
 	}
 
-	public OperePerMostra getMostraPiuGrande(Integer anno) {
-		return dao.getMostraPiuGrande(anno);
-	}
 
 	//un grafo diretto è fortemente connesso se e solo se ha una sola componente connessa
-	//cioè tutti i nodi sono connessi --> uso Kosaraju
+	//cioè se tra tutti i nodi esiste una strada da AB e da BA--> uso Kosaraju
 	public boolean isStronglyConnected() {
 		KosarajuStrongConnectivityInspector<Mostre, DefaultEdge> ksci = new KosarajuStrongConnectivityInspector<Mostre, DefaultEdge>(grafo);
 		return ksci.isStronglyConnected();
+	}	
+
+	public Mostre getMostraPiuGrande(Integer anno) {
+		return dao.getMostraPiuGrande(anno);
 	}
 	
-
+	
 	
 	//2 PUNTO
-
 	public void simula(Integer anno, int numeroStudenti) {
 		sim.init(anno, numeroStudenti, dao, this);
 		sim.run();		

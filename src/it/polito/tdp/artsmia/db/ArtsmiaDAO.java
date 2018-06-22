@@ -1,6 +1,7 @@
 package it.polito.tdp.artsmia.db;
 
 import java.sql.Connection;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,7 +12,6 @@ import java.util.Set;
 
 import it.polito.tdp.artsmia.model.ArtObject;
 import it.polito.tdp.artsmia.model.Mostre;
-import it.polito.tdp.artsmia.model.OperePerMostra;
 
 public class ArtsmiaDAO {
 
@@ -68,6 +68,36 @@ public class ArtsmiaDAO {
 		}
 	}
 
+	public Mostre getMostraPiuGrande(Integer anno) {
+		String sql = "select  e.exhibition_id, e.exhibition_title, e.end, count(eo.object_id) as counter " + 
+				"from exhibitions as e, exhibition_objects as eo " + 
+				"where  e.exhibition_id=eo.exhibition_id " + 
+				"and e.begin >= ? " + 
+				"group by  e.exhibition_id " + 
+				"order by counter DESC LIMIT 1 ";
+		
+		Mostre result=null;
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, anno);
+			ResultSet res = st.executeQuery();
+
+			if(res.next()) {
+				result = new Mostre(res.getInt("exhibition_id"),
+						res.getString("exhibition_title"),anno, res.getInt("end"));
+				result.setNumOpere(res.getInt("counter"));
+			}
+			conn.close();
+			return result;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Prblema di connessione al database");
+		}
+	}
+	
 	public List<Mostre> getMostreDaAnno(Integer anno) {
 		String sql = "SELECT * from exhibitions where begin >= ? ";
 		
@@ -80,8 +110,8 @@ public class ArtsmiaDAO {
 			ResultSet res = st.executeQuery();
 
 			while (res.next()) {
-				Mostre mostra = new Mostre(res.getInt("exhibition_id"), res.getString("exhibition_department"),
-						res.getString("exhibition_title"), res.getInt("begin"), res.getInt("end"));
+				Mostre mostra = new Mostre(res.getInt("exhibition_id"), res.getString("exhibition_title"),
+						                   res.getInt("begin"), res.getInt("end"));
 				result.add(mostra);
 			}
 			conn.close();
@@ -93,6 +123,7 @@ public class ArtsmiaDAO {
 		}
 	}
 
+	/*NON USATA PERCHè GRAFO è ORIENTATO
 	public List<Mostre> getMostreSuccessive(Mostre m) {
 		String sql = "select * " + 
 				"from exhibitions " + 
@@ -109,8 +140,8 @@ public class ArtsmiaDAO {
 			ResultSet res = st.executeQuery();
 
 			while (res.next()) {
-				Mostre mostra = new Mostre(res.getInt("exhibition_id"), res.getString("exhibition_department"),
-						res.getString("exhibition_title"), res.getInt("begin"), res.getInt("end"));
+				Mostre mostra = new Mostre(res.getInt("exhibition_id"),	res.getString("exhibition_title"), 
+						                   res.getInt("begin"), res.getInt("end"));
 				result.add(mostra);
 			}
 			conn.close();
@@ -120,36 +151,8 @@ public class ArtsmiaDAO {
 			e.printStackTrace();
 			throw new RuntimeException("Prblema di connessione al database");
 		}
-	}
+	}*/
 
-	public OperePerMostra getMostraPiuGrande(Integer anno) {
-		String sql = "select  e.exhibition_id, e.exhibition_title, count(eo.object_id) as counter " + 
-				"from exhibitions as e, exhibition_objects as eo " + 
-				"where  e.exhibition_id=eo.exhibition_id " + 
-				"and begin >= ? " + 
-				"group by  e.exhibition_id " + 
-				"order by counter DESC LIMIT 1 ";
-		
-		OperePerMostra result=null;
-		Connection conn = DBConnect.getConnection();
-
-		try {
-			PreparedStatement st = conn.prepareStatement(sql);
-			st.setInt(1, anno);
-			ResultSet res = st.executeQuery();
-
-			if(res.next()) {
-				result = new OperePerMostra(res.getInt("exhibition_id"),
-						res.getString("exhibition_title"), res.getInt("counter"));
-			}
-			conn.close();
-			return result;
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new RuntimeException("Prblema di connessione al database");
-		}
-	}
 
 	//inizializzo tutte le mostre con le loro opere (da simulatore)
 	public List<Integer> getOggetiDaMostra(Mostre mostra) {

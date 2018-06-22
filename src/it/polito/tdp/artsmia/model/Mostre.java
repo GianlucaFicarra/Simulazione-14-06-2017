@@ -2,26 +2,28 @@ package it.polito.tdp.artsmia.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class Mostre {
 
 	private int id; //id mostra
-	private String dipartimento;
 	private String descrizione;
 	private int inizio;
 	private int fine;
+	private int numOpere;
+	private Set<Integer> opere;
 	
 	//Lista con gli id degli oggetti che espone
 	private List<Integer> artObjectsId;
 	
-	public Mostre(int id, String dipartimento, String descrizione, int inizio, int fine) {
+	public Mostre(int id, String descrizione, int inizio, int fine) {
 		super();
 		this.id = id;
-		this.dipartimento = dipartimento;
 		this.descrizione = descrizione;
 		this.inizio = inizio;
 		this.fine = fine;
 		
+		numOpere=0;
 		artObjectsId = new ArrayList<Integer>();
 	}
 
@@ -40,14 +42,6 @@ public class Mostre {
 
 	public void setId(int id) {
 		this.id = id;
-	}
-
-	public String getDipartimento() {
-		return dipartimento;
-	}
-
-	public void setDipartimento(String dipartimento) {
-		this.dipartimento = dipartimento;
 	}
 
 	public String getDescrizione() {
@@ -72,6 +66,22 @@ public class Mostre {
 
 	public void setFine(int fine) {
 		this.fine = fine;
+	}
+
+	public int getNumOpere() {
+		return numOpere;
+	}
+
+	public void setNumOpere(int numOpere) {
+		this.numOpere += numOpere;
+	}
+
+	public Set<Integer> getOpere() {
+		return opere;
+	}
+
+	public void setOpere(Set<Integer> opere) {
+		this.opere = opere;
 	}
 
 	@Override

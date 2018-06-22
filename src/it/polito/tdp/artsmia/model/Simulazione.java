@@ -1,6 +1,7 @@
 package it.polito.tdp.artsmia.model;
 
 import java.util.ArrayList;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -29,7 +30,8 @@ public class Simulazione {
 	LinkedList<Event> queue;
 	
 	//VALORI OUTPUT
-	LinkedList<SimResult> result;
+	//è la lista stessa di studenti aggiornata con le opere viste
+
 	
 
 	public void init(int anno, int numeroStudenti, ArtsmiaDAO dao, Model model) {
@@ -42,7 +44,6 @@ public class Simulazione {
 		random = new Random();
 		studenti=new ArrayList<>();
 		mostre= new LinkedList<>();
-		result = new LinkedList<>();
 		
 		//Carico oggetti_id nelle mostre(vertici grafo) direttamente dal dao
 			for (Mostre m : model.grafo.vertexSet()) {
@@ -80,20 +81,15 @@ public class Simulazione {
 
 	private void processEvent(Event e) {
 		// aggiungo al SET(no doppi) dello studente tutte le opere in esposizione per quella mostra
-		 e.getStudente().getArtObjectSet().addAll(e.getExhibition().getArtObjectsId());
+		 e.getStudente().getOpereVisteSet().addAll(e.getExhibition().getArtObjectsId());
 		 
 
 		// Controllo se la simulazione deve andare avanti
-		List<Mostre> successori=dao.getMostreSuccessive(e.getExhibition());
-		if(successori.size()>0) {
+		 List<Mostre> successori = Graphs.successorListOf(model.grafo, e.getExhibition()); //essendo orientato
+		 if(successori.size()>0) {
 			int x2 = random.nextInt(successori.size());
 			Mostre casualMostra2 = successori.get(x2);
 			
-		 /*in soluzione
-			int x2 = random.nextInt(model.grafo.outDegreeOf(e.getExhibition()));
-			Mostre casualMostra2 = Graphs.successorListOf(model.grafo, e.getExhibition()).get(x2);
-		*/
-		 
 			// Crea un nuovo evento ed aggiungilo alla coda degli eventi
 		    Event e2= new Event(e.getStudente(), casualMostra2);
 		    queue.add(e2);
